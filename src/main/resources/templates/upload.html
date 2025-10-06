@@ -1,0 +1,401 @@
+<!-- src/main/resources/templates/upload.html -->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Tài Liệu - Tài Liệu PTIT</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding-top: 100px; /* Tăng padding để tránh navbar che nội dung */
+    }
+
+    .navbar {
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        min-height: 80px; /* Đảm bảo navbar có chiều cao cố định */
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        color: #667eea !important;
+        font-size: 1.8rem;
+    }
+
+    .upload-header {
+        margin-top: 1rem; /* Thêm margin top để tạo khoảng cách */
+    }
+
+    .upload-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin: 2rem 0;
+    }
+
+    .upload-header {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+    }
+
+    /* Category search dropdown styles */
+    .position-relative .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .dropdown-item {
+        padding: 0.75rem 1rem;
+        border: none;
+        background: none;
+        text-align: left;
+        width: 100%;
+        transition: background-color 0.2s;
+    }
+
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .dropdown-item.text-primary {
+        color: #667eea !important;
+    }
+
+    .dropdown-item.text-primary:hover {
+        background-color: rgba(102, 126, 234, 0.1);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        body {
+            padding-top: 120px; /* Tăng padding cho mobile vì navbar có thể cao hơn */
+        }
+    }
+  </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/}" style="font-weight: 700; color: #667eea;">
+      <i class="fas fa-graduation-cap"></i>
+      Tài Liệu PTIT
+    </a>
+
+    <div class="navbar-nav ms-auto">
+      <a class="nav-link" th:href="@{/}">Trang chủ</a>
+      <a class="nav-link" th:href="@{/document/all}">Tài liệu</a>
+      <a class="nav-link active" th:href="@{/document/upload}">Upload</a>
+
+      <!-- Auth buttons when not logged in -->
+      <div class="d-flex gap-2 ms-3" th:if="${session.currentUser == null}">
+        <a th:href="@{/auth/login}" class="btn btn-outline-primary btn-sm">Đăng nhập</a>
+        <a th:href="@{/auth/register}" class="btn btn-primary btn-sm">Đăng ký</a>
+      </div>
+
+      <!-- User menu when logged in -->
+      <div class="dropdown ms-3" th:if="${session.currentUser != null}">
+        <button class="btn btn-outline-primary dropdown-toggle" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fas fa-user"></i>
+          <span th:text="${session.currentUser.username}">Username</span>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" th:href="@{/profile}">
+            <i class="fas fa-user me-2"></i>Thông tin cá nhân
+          </a></li>
+          <li><a class="dropdown-item active" th:href="@{/document/upload}">
+            <i class="fas fa-upload me-2"></i>Upload tài liệu
+          </a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" th:href="@{/auth/logout}">
+            <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+          </a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="upload-header">
+    <h2><i class="fas fa-cloud-upload-alt"></i> Upload Tài Liệu</h2>
+    <p>Chia sẻ tài liệu học tập với cộng đồng sinh viên PTIT</p>
+  </div>
+
+  <div class="upload-container">
+    <!-- Check if user is logged in -->
+    <div th:if="${session.currentUser == null}" class="alert alert-warning" role="alert">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      <strong>Yêu cầu đăng nhập:</strong> Vui lòng
+      <a th:href="@{/auth/login}" class="alert-link">đăng nhập</a>
+      để upload tài liệu.
+    </div>
+
+    <!-- Show upload form only if logged in -->
+    <div th:if="${session.currentUser != null}">
+      <!-- Alert Messages -->
+      <div th:if="${message}" class="alert alert-success" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${message}"></span>
+      </div>
+
+      <div th:if="${error}" class="alert alert-danger" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+      </div>
+
+      <form method="POST" th:action="@{/document/add}" enctype="multipart/form-data">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="title" class="form-label">Tiêu đề tài liệu *</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="categorySearch" class="form-label">Danh mục *</label>
+            <div class="position-relative">
+              <input type="text" class="form-control" id="categorySearch"
+                     placeholder="Tìm kiếm hoặc tạo danh mục mới..."
+                     autocomplete="off" required>
+              <div id="categoryDropdown" class="dropdown-menu w-100" style="display: none;">
+                <!-- Category suggestions will be populated here -->
+              </div>
+            </div>
+            <small class="form-text text-muted">
+              Nhập tên danh mục. Nếu chưa có, sẽ tạo mới tự động.
+            </small>
+
+            <!-- Hidden fields to store selected category info -->
+            <input type="hidden" id="selectedCategoryId" name="category.categoryId">
+            <input type="hidden" id="selectedCategoryName" name="categoryName">
+            <input type="hidden" id="newCategoryDescription" name="newCategoryDescription">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="description" class="form-label">Mô tả</label>
+          <textarea class="form-control" id="description" name="description"
+                    rows="4" placeholder="Mô tả ngắn về tài liệu"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="file" class="form-label">Chọn file *</label>
+          <input type="file" class="form-control" id="file" name="file" required>
+          <div class="form-text">
+            Hỗ trợ: PDF, DOC, DOCX, PPT, PPTX, TXT (Tối đa 10MB)
+          </div>
+        </div>
+
+        <div class="text-center">
+          <button type="submit" class="btn btn-primary btn-lg me-3">
+            <i class="fas fa-upload"></i> Upload Tài Liệu
+          </button>
+          <a th:href="@{/}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Show login prompt if not logged in -->
+    <div th:if="${session.currentUser == null}" class="text-center py-5">
+      <i class="fas fa-lock fa-3x text-muted mb-3"></i>
+      <h5>Cần đăng nhập để upload tài liệu</h5>
+      <p class="text-muted">Tham gia cộng đồng để chia sẻ tài liệu học tập</p>
+      <a th:href="@{/auth/login}" class="btn btn-primary me-2">
+        <i class="fas fa-sign-in-alt"></i> Đăng nhập
+      </a>
+      <a th:href="@{/auth/register}" class="btn btn-outline-primary">
+        <i class="fas fa-user-plus"></i> Đăng ký
+      </a>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  let categories = [];
+  let selectedCategory = null;
+
+  // Load categories on page load
+  document.addEventListener('DOMContentLoaded', function() {
+      loadCategories();
+      setupCategorySearch();
+  });
+
+  // Load all categories from server
+  function loadCategories() {
+      fetch('/category/api/search?q=')
+          .then(response => response.json())
+          .then(data => {
+              categories = data;
+              console.log('Loaded categories:', categories.length);
+          })
+          .catch(error => {
+              console.error('Error loading categories:', error);
+          });
+  }
+
+  // Setup category search functionality
+  function setupCategorySearch() {
+      const searchInput = document.getElementById('categorySearch');
+      const dropdown = document.getElementById('categoryDropdown');
+
+      // Show dropdown when input is focused
+      searchInput.addEventListener('focus', function() {
+          showCategoryDropdown('');
+      });
+
+      // Hide dropdown when clicking outside
+      document.addEventListener('click', function(event) {
+          if (!event.target.closest('.position-relative')) {
+              dropdown.style.display = 'none';
+          }
+      });
+
+      // Search categories as user types
+      searchInput.addEventListener('input', function() {
+          const query = this.value;
+          showCategoryDropdown(query);
+      });
+
+      // Handle form submission
+      const form = document.querySelector('form');
+      if (form) {
+          form.addEventListener('submit', function(event) {
+              if (!selectedCategory && searchInput.value.trim()) {
+                  event.preventDefault();
+                  createNewCategory(searchInput.value.trim());
+              }
+          });
+      }
+  }
+
+  // Show category dropdown with filtered results
+  function showCategoryDropdown(query) {
+      const dropdown = document.getElementById('categoryDropdown');
+      const filteredCategories = categories.filter(cat =>
+          cat.name.toLowerCase().includes(query.toLowerCase())
+      );
+
+      let html = '';
+
+      // Show existing categories
+      filteredCategories.forEach(category => {
+          html += `
+              <a class="dropdown-item" href="#" onclick="selectCategory(${category.categoryId}, '${category.name.replace(/'/g, "\\'")}')">
+                  <i class="fas fa-tag me-2"></i>
+                  <strong>${category.name}</strong>
+                  ${category.description ? '<br><small class="text-muted">' + category.description + '</small>' : ''}
+              </a>
+          `;
+      });
+
+      // Show "Create new category" option if query doesn't match exactly
+      if (query && !categories.some(cat => cat.name.toLowerCase() === query.toLowerCase())) {
+          html += `
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item text-primary" href="#" onclick="showCreateCategoryForm('${query.replace(/'/g, "\\'")}')">
+                  <i class="fas fa-plus me-2"></i>
+                  Tạo danh mục mới: "<strong>${query}</strong>"
+              </a>
+          `;
+      }
+
+      if (html) {
+          dropdown.innerHTML = html;
+          dropdown.style.display = 'block';
+      } else {
+          dropdown.style.display = 'none';
+      }
+  }
+
+  // Select existing category
+  function selectCategory(categoryId, categoryName) {
+      const searchInput = document.getElementById('categorySearch');
+      const dropdown = document.getElementById('categoryDropdown');
+
+      searchInput.value = categoryName;
+      document.getElementById('selectedCategoryId').value = categoryId;
+      document.getElementById('selectedCategoryName').value = categoryName;
+
+      selectedCategory = { categoryId, name: categoryName };
+      dropdown.style.display = 'none';
+
+      console.log('Selected category:', selectedCategory);
+  }
+
+  // Show create category form
+  function showCreateCategoryForm(categoryName) {
+      const description = prompt(
+          'Tạo danh mục mới: ' + categoryName + '\n\n' +
+          'Nhập mô tả cho danh mục (có thể để trống):'
+      );
+
+      if (description !== null) { // User didn't cancel
+          createNewCategory(categoryName, description);
+      }
+  }
+
+  // Create new category
+  function createNewCategory(categoryName, description = '') {
+      console.log('Creating new category:', categoryName);
+
+      const formData = new FormData();
+      formData.append('name', categoryName);
+      formData.append('description', description);
+
+      fetch('/category/api/create', {
+          method: 'POST',
+          body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.error) {
+              alert('Lỗi: ' + data.error);
+          } else {
+              console.log('Category created:', data);
+
+              // Add to local categories list
+              categories.push(data);
+
+              // Select the new category
+              selectCategory(data.categoryId, data.name);
+
+              // Submit the form
+              document.querySelector('form').submit();
+          }
+      })
+      .catch(error => {
+          console.error('Error creating category:', error);
+          alert('Lỗi khi tạo danh mục. Vui lòng thử lại.');
+      });
+  }
+</script>
+</body>
+</html>

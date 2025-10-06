@@ -1,0 +1,268 @@
+<!-- src/main/resources/templates/profile.html -->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${title}">Thông tin cá nhân - Tài Liệu PTIT</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding-top: 100px; /* Tăng padding để tránh navbar che */
+    }
+
+    .navbar {
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+    }
+
+    .profile-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin: 2rem 0;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2.5rem;
+    }
+
+    .stats-card {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .stats-card h3 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .document-item, .comment-item {
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: box-shadow 0.3s;
+    }
+
+    .document-item:hover, .comment-item:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/}" style="font-weight: 700; color: #667eea;">
+      <i class="fas fa-graduation-cap"></i>
+      Tài Liệu PTIT
+    </a>
+
+    <div class="navbar-nav ms-auto">
+      <a class="nav-link" th:href="@{/}">Trang chủ</a>
+      <a class="nav-link" th:href="@{/document/all}">Tài liệu</a>
+      <a class="nav-link" th:href="@{/document/upload}">Upload</a>
+
+      <!-- User menu when logged in -->
+      <div class="dropdown" th:if="${session.currentUser != null}">
+        <button class="btn btn-outline-primary dropdown-toggle" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fas fa-user"></i>
+          <span th:text="${session.currentUser.username}">Username</span>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item active" th:href="@{/profile}">
+            <i class="fas fa-user me-2"></i>Thông tin cá nhân
+          </a></li>
+          <li><a class="dropdown-item" th:href="@{/document/upload}">
+            <i class="fas fa-upload me-2"></i>Upload tài liệu
+          </a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" th:href="@{/auth/logout}">
+            <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+          </a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="profile-avatar">
+      <i class="fas fa-user"></i>
+    </div>
+    <h2 th:text="${user.username}">Username</h2>
+    <p class="mb-0" th:text="${user.email}">Email</p>
+    <small>Thành viên từ: Tháng này</small>
+  </div>
+
+  <div class="row">
+    <!-- Statistics -->
+    <div class="col-md-4">
+      <div class="profile-container">
+        <h5 class="mb-3"><i class="fas fa-chart-bar me-2 text-primary"></i>Thống kê</h5>
+
+        <div class="stats-card">
+          <h3 th:text="${#lists.size(userDocuments)}">0</h3>
+          <p class="mb-0">Tài liệu đã chia sẻ</p>
+        </div>
+
+        <div class="stats-card" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
+          <h3 th:text="${#lists.size(userComments)}">0</h3>
+          <p class="mb-0">Bình luận</p>
+        </div>
+
+        <div class="text-center mt-3">
+          <a th:href="@{/document/upload}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Thêm tài liệu mới
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- User's Documents -->
+    <div class="col-md-8">
+      <div class="profile-container">
+        <h5 class="mb-3">
+          <i class="fas fa-file-alt me-2 text-primary"></i>
+          Tài liệu của tôi (<span th:text="${#lists.size(userDocuments)}">0</span>)
+        </h5>
+
+        <div th:if="${userDocuments != null and not #lists.isEmpty(userDocuments)}">
+          <div class="document-item" th:each="doc : ${userDocuments}">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <h6 class="mb-2">
+                  <a th:href="@{/document/{id}(id=${doc.documentId})}"
+                     class="text-decoration-none" th:text="${doc.title}">Document Title</a>
+                </h6>
+                <p class="text-muted mb-2"
+                   th:text="${doc.description != null and not #strings.isEmpty(doc.description) ?
+                                           (doc.description.length() > 150 ? doc.description.substring(0, 147) + '...' : doc.description) :
+                                           'Không có mô tả'}">
+                  Description
+                </p>
+                <small class="text-muted">
+                  <i class="fas fa-tag me-1"></i>
+                  <span th:text="${doc.category != null ? doc.category.name : 'Khác'}">Category</span>
+                </small>
+              </div>
+              <div class="ms-3">
+                <a th:href="@{/document/{id}(id=${doc.documentId})}"
+                   class="btn btn-sm btn-outline-primary me-2">
+                  <i class="fas fa-eye"></i>
+                </a>
+                <a th:href="@{/document/{id}/download(id=${doc.documentId})}"
+                   class="btn btn-sm btn-success me-2">
+                  <i class="fas fa-download"></i>
+                </a>
+
+                <!-- Admin only: Delete button -->
+                <button th:if="${session.currentUser != null and session.currentUser.username == 'admin'}"
+                        class="btn btn-sm btn-danger"
+                        th:attr="data-doc-id=${doc.documentId}, data-doc-title=${doc.title}"
+                        onclick="confirmDeleteFromProfile(this.getAttribute('data-doc-id'), this.getAttribute('data-doc-title'))">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div th:if="${userDocuments == null or #lists.isEmpty(userDocuments)}"
+             class="text-center py-4">
+          <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+          <h6 class="text-muted">Bạn chưa chia sẻ tài liệu nào</h6>
+          <a th:href="@{/document/upload}" class="btn btn-primary mt-2">
+            <i class="fas fa-plus me-2"></i>Chia sẻ tài liệu đầu tiên
+          </a>
+        </div>
+      </div>
+
+      <!-- User's Comments -->
+      <div class="profile-container mt-4">
+        <h5 class="mb-3">
+          <i class="fas fa-comments me-2 text-primary"></i>
+          Bình luận gần đây (<span th:text="${userComments != null ? #lists.size(userComments) : 0}">0</span>)
+        </h5>
+
+        <div th:if="${userComments != null and not #lists.isEmpty(userComments)}">
+          <!-- Display first 5 comments only -->
+          <th:block th:each="comment, iterStat : ${userComments}">
+            <div th:if="${iterStat.index < 5}" class="comment-item">
+              <p class="mb-2" th:text="${comment.content}">Comment content</p>
+              <small class="text-muted">
+                Bình luận trong:
+                <a th:href="@{/document/{id}(id=${comment.document.documentId})}"
+                   class="text-decoration-none" th:text="${comment.document.title}">Document</a>
+              </small>
+            </div>
+          </th:block>
+
+          <div th:if="${userComments != null and #lists.size(userComments) > 5}" class="text-center mt-3">
+            <small class="text-muted">
+              Và <span th:text="${#lists.size(userComments) - 5}">0</span> bình luận khác...
+            </small>
+          </div>
+        </div>
+
+        <div th:if="${userComments == null or #lists.isEmpty(userComments)}"
+             class="text-center py-4">
+          <i class="fas fa-comment-slash fa-2x text-muted mb-3"></i>
+          <p class="text-muted">Bạn chưa có bình luận nào</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  function confirmDeleteFromProfile(documentId, documentTitle) {
+      const isConfirmed = confirm(
+          'Xóa tài liệu "' + documentTitle + '"?\n\n' +
+          'Tài liệu và tất cả bình luận sẽ bị xóa vĩnh viễn!'
+      );
+
+      if (isConfirmed) {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = '/document/' + documentId + '/delete';
+          form.style.display = 'none';
+          document.body.appendChild(form);
+          form.submit();
+      }
+  }
+</script>
+</body>
+</html>

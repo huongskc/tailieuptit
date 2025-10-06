@@ -1,0 +1,272 @@
+<!-- src/main/resources/templates/document-detail.html -->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${doc.title + ' - Tài Liệu PTIT'}">Chi tiết tài liệu</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding-top: 100px; /* Tăng padding để tránh navbar che */
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: #667eea !important;
+        }
+
+        .content-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .comment {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .comment strong {
+            color: #667eea;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}">
+            <i class="fas fa-graduation-cap"></i>
+            Tài Liệu PTIT
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/}">Trang chủ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/document/all}">Tài liệu</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/document/upload}">Upload</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/about}">Giới thiệu</a>
+                </li>
+            </ul>
+
+            <!-- Auth buttons when not logged in -->
+            <div class="d-flex gap-2" th:if="${session.currentUser == null}">
+                <a th:href="@{/auth/login}" class="btn btn-outline-primary">Đăng nhập</a>
+                <a th:href="@{/auth/register}" class="btn btn-primary">Đăng ký</a>
+            </div>
+
+            <!-- User menu when logged in -->
+            <div class="dropdown" th:if="${session.currentUser != null}">
+                <button class="btn btn-outline-primary dropdown-toggle" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user"></i>
+                    <span th:text="${session.currentUser.username}">Username</span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" th:href="@{/profile}">
+                        <i class="fas fa-user me-2"></i>Thông tin cá nhân
+                    </a></li>
+                    <li><a class="dropdown-item" th:href="@{/document/upload}">
+                        <i class="fas fa-upload me-2"></i>Upload tài liệu
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" th:href="@{/auth/logout}">
+                        <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Alert Messages -->
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Document Details -->
+    <div class="content-container">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">
+                    <i class="fas fa-file-alt me-2"></i>
+                    <span th:text="${doc.title}">Document Title</span>
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-user me-2"></i>Người upload:</strong>
+                        <span th:text="${doc.user != null ? doc.user.username : 'Anonymous'}">Username</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-tag me-2"></i>Danh mục:</strong>
+                        <span th:text="${doc.category != null ? doc.category.name : 'Khác'}">Category</span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <strong><i class="fas fa-info-circle me-2"></i>Mô tả:</strong>
+                    <p th:text="${doc.description != null ? doc.description : 'Không có mô tả'}" class="mt-2">Description</p>
+                </div>
+
+                <div class="mb-3">
+                    <strong><i class="fas fa-file me-2"></i>File:</strong>
+                    <span th:text="${doc.filePath}">File path</span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a th:href="@{/document/{id}/download(id=${doc.documentId})}"
+                       class="btn btn-success">
+                        <i class="fas fa-download"></i> Tải về
+                    </a>
+
+                    <!-- Admin only: Delete button -->
+                    <div th:if="${session.currentUser != null and session.currentUser.username == 'admin'}">
+                        <button class="btn btn-danger"
+                                th:attr="data-doc-id=${doc.documentId}, data-doc-title=${doc.title}"
+                                onclick="confirmDelete(this.getAttribute('data-doc-id'), this.getAttribute('data-doc-title'))">
+                            <i class="fas fa-trash"></i> Xóa
+                        </button>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="content-container">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-comments me-2"></i>
+                    Bình luận (<span th:text="${comments != null ? #lists.size(comments) : 0}">0</span>)
+                </h4>
+            </div>
+            <div class="card-body">
+                <!-- Add Comment Form - Only show if logged in -->
+                <div th:if="${session.currentUser != null}">
+                    <form method="POST" th:action="@{/document/{id}/comment(id=${doc.documentId})}"
+                          class="mb-4">
+                        <div class="mb-3">
+                                <textarea class="form-control" name="content" rows="3"
+                                          placeholder="Viết bình luận của bạn..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-comment"></i> Gửi bình luận
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Login prompt if not logged in -->
+                <div th:if="${session.currentUser == null}" class="alert alert-info mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <a th:href="@{/auth/login}" class="alert-link">Đăng nhập</a> để thêm bình luận
+                </div>
+
+                <!-- Comments List -->
+                <div th:if="${comments != null and not #lists.isEmpty(comments)}">
+                    <div class="comment" th:each="comment : ${comments}">
+                        <strong th:text="${comment.user != null ? comment.user.username : 'Anonymous'}">Username</strong>
+                        <p th:text="${comment.content}" class="mb-1">Comment content</p>
+                    </div>
+                </div>
+
+                <div th:if="${comments == null or #lists.isEmpty(comments)}"
+                     class="text-center text-muted py-4">
+                    <i class="fas fa-comment-slash fa-2x mb-3"></i>
+                    <p>Chưa có bình luận nào. Hãy là người đầu tiên!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function confirmDelete(documentId, documentTitle) {
+        console.log('Delete function called with ID:', documentId, 'Title:', documentTitle);
+
+        // Create custom confirmation dialog
+        const isConfirmed = confirm(
+            'Bạn có chắc chắn muốn xóa tài liệu "' + documentTitle + '"?\n\n' +
+            'Hành động này không thể hoàn tác. Tài liệu và tất cả bình luận liên quan sẽ bị xóa vĩnh viễn.'
+        );
+
+        console.log('User confirmed:', isConfirmed);
+
+        if (isConfirmed) {
+            console.log('Creating form to submit delete request');
+
+            // Create a form and submit it
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/document/' + documentId + '/delete';
+
+            // Make form invisible
+            form.style.display = 'none';
+
+            console.log('Form action:', form.action);
+            console.log('Form method:', form.method);
+
+            // Append to body and submit
+            document.body.appendChild(form);
+            console.log('Submitting form...');
+            form.submit();
+        } else {
+            console.log('Delete cancelled by user');
+        }
+    }
+
+    // Test function to verify JavaScript is working
+    window.testDelete = function() {
+        alert('JavaScript is working!');
+        console.log('Test function called');
+    };
+</script>
+</body>
+</html>

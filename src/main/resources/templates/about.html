@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giới thiệu - Tài Liệu PTIT</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding-top: 80px;
+    }
+
+    .navbar {
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+    }
+
+    .content-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin: 2rem 0;
+    }
+  </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/}" style="font-weight: 700; color: #667eea;">
+      <i class="fas fa-graduation-cap"></i>
+      Tài Liệu PTIT
+    </a>
+
+    <div class="navbar-nav ms-auto">
+      <a class="nav-link" th:href="@{/}">Trang chủ</a>
+      <a class="nav-link" th:href="@{/document/all}">Tài liệu</a>
+      <a class="nav-link" th:href="@{/document/upload}">Upload</a>
+      <a class="nav-link active" th:href="@{/about}">Giới thiệu</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="content-container">
+    <div class="text-center mb-4">
+      <h2><i class="fas fa-info-circle me-2 text-primary"></i>Giới thiệu về Tài Liệu PTIT</h2>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <h4>Về Tài Liệu PTIT</h4>
+        <p class="lead">
+          Tài Liệu PTIT là nền tảng chia sẻ tài liệu học tập trực tuyến dành riêng cho
+          sinh viên Học viện Công nghệ Bưu chính Viễn thông (PTIT).
+        </p>
+
+        <h5><i class="fas fa-target me-2 text-primary"></i>Mục tiêu</h5>
+        <ul class="list-unstyled">
+          <li><i class="fas fa-check text-success me-2"></i>Tạo ra một thư viện tài liệu học tập phong phú và đa dạng</li>
+          <li><i class="fas fa-check text-success me-2"></i>Kết nối và chia sẻ kiến thức giữa các sinh viên PTIT</li>
+          <li><i class="fas fa-check text-success me-2"></i>Hỗ trợ quá trình học tập và nghiên cứu của sinh viên</li>
+          <li><i class="fas fa-check text-success me-2"></i>Xây dựng cộng đồng học tập tích cực và hiệu quả</li>
+        </ul>
+
+        <h5><i class="fas fa-star me-2 text-primary"></i>Tính năng chính</h5>
+        <div class="row">
+          <div class="col-md-6">
+            <ul class="list-unstyled">
+              <li><i class="fas fa-upload text-success me-2"></i>Upload tài liệu dễ dàng</li>
+              <li><i class="fas fa-search text-info me-2"></i>Tìm kiếm thông minh</li>
+              <li><i class="fas fa-download text-primary me-2"></i>Tải về miễn phí</li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <ul class="list-unstyled">
+              <li><i class="fas fa-comments text-warning me-2"></i>Bình luận và thảo luận</li>
+              <li><i class="fas fa-tags text-secondary me-2"></i>Phân loại theo danh mục</li>
+              <li><i class="fas fa-mobile text-success me-2"></i>Giao diện responsive</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="text-center mt-4">
+          <a th:href="@{/document/upload}" class="btn btn-primary me-3">
+            <i class="fas fa-plus"></i> Đóng góp tài liệu
+          </a>
+          <a th:href="@{/}" class="btn btn-outline-primary">
+            <i class="fas fa-home"></i> Về trang chủ
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

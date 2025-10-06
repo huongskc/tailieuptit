@@ -1,0 +1,346 @@
+<!-- src/main/resources/templates/index.html -->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${title} ?: 'Trang chủ - Tài Liệu PTIT'">Tài Liệu PTIT</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding-top: 100px; /* Tăng padding để tránh navbar che */
+    }
+
+    .navbar {
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: #667eea !important;
+    }
+
+    .nav-link {
+        font-weight: 500;
+        color: #333 !important;
+        transition: color 0.3s;
+    }
+
+    .nav-link:hover {
+        color: #667eea !important;
+    }
+
+    .hero {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        padding: 4rem 0;
+        text-align: center;
+        color: white;
+    }
+
+    .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .main-content {
+        background: white;
+        margin-top: -50px;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        min-height: 80vh;
+        padding: 3rem 0;
+    }
+
+    .category-card {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+        height: 100%;
+    }
+
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+
+    .category-card i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .document-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+    }
+
+    .document-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+
+    .document-header {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .document-header i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title i {
+        color: #667eea;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+    }
+
+    @media (max-width: 768px) {
+        .hero h1 {
+            font-size: 2rem;
+        }
+    }
+  </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/}">
+      <i class="fas fa-graduation-cap"></i>
+      Tài Liệu PTIT
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/}">Trang chủ</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/document/all}">Tài liệu</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/document/upload}">Upload</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/about}">Giới thiệu</a>
+        </li>
+      </ul>
+
+      <div class="d-flex gap-2" th:if="${session.currentUser == null}">
+        <a th:href="@{/auth/login}" class="btn btn-outline-primary">Đăng nhập</a>
+        <a th:href="@{/auth/register}" class="btn btn-primary">Đăng ký</a>
+      </div>
+
+      <!-- User menu when logged in -->
+      <div class="dropdown" th:if="${session.currentUser != null}">
+        <button class="btn btn-outline-primary dropdown-toggle" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fas fa-user"></i>
+          <span th:text="${session.currentUser.username}">Username</span>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" th:href="@{/profile}">
+            <i class="fas fa-user me-2"></i>Thông tin cá nhân
+          </a></li>
+          <li><a class="dropdown-item" th:href="@{/document/upload}">
+            <i class="fas fa-upload me-2"></i>Upload tài liệu
+          </a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" th:href="@{/logout}">
+            <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+          </a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <h1>Chia Sẻ Tài Liệu Học Tập</h1>
+    <p>Nơi tập hợp tài liệu học tập chất lượng cao dành cho sinh viên PTIT</p>
+
+    <form class="d-flex justify-content-center" method="GET" th:action="@{/search}">
+      <div class="input-group" style="max-width: 600px;">
+        <input type="text" class="form-control" name="q"
+               th:value="${searchQuery}"
+               placeholder="Tìm kiếm tài liệu, môn học...">
+        <button class="btn btn-primary" type="submit">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- Main Content -->
+<main class="main-content">
+  <div class="container">
+
+    <!-- Alert Messages -->
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="fas fa-check-circle me-2"></i>
+      <span th:text="${message}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="fas fa-exclamation-circle me-2"></i>
+      <span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Categories Section -->
+    <section class="mb-5" th:if="${categories != null and not #lists.isEmpty(categories)}">
+      <h2 class="section-title">
+        <i class="fas fa-th-large"></i>
+        Danh Mục Tài Liệu
+      </h2>
+
+      <div class="row g-4">
+        <div class="col-lg-4 col-md-6" th:each="category, iterStat : ${categories}">
+          <a th:href="@{/document/category/{id}(id=${category.categoryId})}"
+             class="category-card">
+            <i th:class="${iterStat.index == 0 ? 'fas fa-book' :
+                                         iterStat.index == 1 ? 'fas fa-calculator' :
+                                         iterStat.index == 2 ? 'fas fa-flask' :
+                                         iterStat.index == 3 ? 'fas fa-code' :
+                                         iterStat.index == 4 ? 'fas fa-chart-bar' :
+                                         iterStat.index == 5 ? 'fas fa-language' :
+                                         iterStat.index == 6 ? 'fas fa-database' :
+                                         iterStat.index == 7 ? 'fas fa-network-wired' : 'fas fa-robot'}"></i>
+            <h5 th:text="${category.name}">Category Name</h5>
+            <p th:text="${category.description != null ? category.description : 'Tài liệu chuyên ngành'}">Category Description</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Documents Section -->
+    <section>
+      <h2 class="section-title">
+        <i class="fas fa-file-alt"></i>
+        <span th:text="${selectedCategory != null ? selectedCategory.name : 'Tài Liệu Mới Nhất'}">Tài Liệu Mới Nhất</span>
+      </h2>
+
+      <div class="row g-4" th:if="${documents != null and not #lists.isEmpty(documents)}">
+        <div class="col-lg-4 col-md-6" th:each="doc : ${documents}">
+          <div class="card document-card">
+            <div class="document-header">
+              <i class="fas fa-file-pdf"></i>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title" th:text="${doc.title}">Document Title</h5>
+
+              <div class="text-muted mb-2">
+                <small>
+                  <i class="fas fa-user"></i>
+                  <span th:text="${doc.user != null ? doc.user.username : 'Anonymous'}">User</span> |
+                  <i class="fas fa-tag"></i>
+                  <span th:text="${doc.category != null ? doc.category.name : 'Khác'}">Category</span>
+                </small>
+              </div>
+
+              <p class="card-text" th:text="${doc.description != null and not #strings.isEmpty(doc.description) ?
+                                    (doc.description.length() > 100 ? doc.description.substring(0, 97) + '...' : doc.description) : 'Không có mô tả'}">
+                Document description...
+              </p>
+
+              <div class="d-flex gap-2">
+                <a th:href="@{/document/{id}/download(id=${doc.documentId})}"
+                   class="btn btn-success btn-sm flex-fill">
+                  <i class="fas fa-download"></i> Tải về
+                </a>
+                <a th:href="@{/document/{id}(id=${doc.documentId})}"
+                   class="btn btn-info btn-sm flex-fill">
+                  <i class="fas fa-eye"></i> Xem
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div th:if="${documents == null or #lists.isEmpty(documents)}"
+           class="text-center py-5">
+        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">Chưa có tài liệu nào</h4>
+        <p class="text-muted">Hãy là người đầu tiên chia sẻ tài liệu!</p>
+        <a th:href="@{/document/upload}" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Thêm tài liệu
+        </a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-4 mt-5">
+  <div class="container text-center">
+    <p>&copy; 2024 Tài Liệu PTIT. Tất cả quyền được bảo lưu.</p>
+    <p>Website chia sẻ tài liệu học tập dành cho sinh viên PTIT</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  function confirmDeleteFromHome(documentId, documentTitle) {
+      const isConfirmed = confirm(
+          'Xóa tài liệu "' + documentTitle + '"?\n\n' +
+          'Hành động này không thể hoàn tác!'
+      );
+
+      if (isConfirmed) {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = '/document/' + documentId + '/delete';
+          form.style.display = 'none';
+          document.body.appendChild(form);
+          form.submit();
+      }
+  }
+</script>
+</body>
+</html>
