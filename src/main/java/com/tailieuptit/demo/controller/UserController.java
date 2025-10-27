@@ -40,7 +40,6 @@ public class UserController {
             User newUser = userService.createUser(user);
             return new ResponseEntity<>(newUser, HttpStatus.CREATED);
         } catch (Exception e) {
-            // Xử lý lỗi (ví dụ: trùng username nếu logic được thêm vào service)
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
     }
@@ -52,7 +51,6 @@ public class UserController {
             User updatedUser = userService.updateUser(id, userDetails);
             return ResponseEntity.ok(updatedUser);
         } catch (RuntimeException e) {
-            // Lỗi do không tìm thấy user (ném ra từ Service)
             return ResponseEntity.notFound().build();
         }
     }
@@ -64,7 +62,6 @@ public class UserController {
             userService.deleteUser(id);
             return ResponseEntity.ok("Deleted user with id " + id);
         } catch (RuntimeException e) {
-            // Lỗi do không tìm thấy user (ném ra từ Service)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }

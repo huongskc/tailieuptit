@@ -25,14 +25,7 @@ public class HomeController {
 
     // Trang chủ - chỉ hiển thị danh mục và tài liệu
     @GetMapping("/")
-    public String home(Model model,
-                       // THÊM: Đọc tham số logoutSuccess từ URL
-                       @RequestParam(value = "logoutSuccess", required = false) Boolean logoutSuccess) {
-
-        // THÊM: Kiểm tra nếu logoutSuccess=true thì thêm tin nhắn
-        if (logoutSuccess != null && logoutSuccess) {
-            model.addAttribute("message", "Đã đăng xuất thành công!");
-        }
+    public String home(Model model) {
 
         List<Category> categories = categoryService.getAllCategories();
         List<Document> documents = documentService.getAllDocuments();
