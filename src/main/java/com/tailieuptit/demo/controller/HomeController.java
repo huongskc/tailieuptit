@@ -41,24 +41,4 @@ public class HomeController {
         model.addAttribute("title", "Giới thiệu");
         return "about";
     }
-
-    // Simple test endpoint for debugging
-    @GetMapping("/test")
-    @ResponseBody
-    public String test() {
-        return "Server is running! Time: " + java.time.LocalDateTime.now();
-    }
-
-    // Debug endpoints - should be removed in production
-    @GetMapping("/debug/users")
-    @ResponseBody
-    public String debugUsers() {
-        return "Debug endpoint moved to AdminController";
-    }
-
-    @GetMapping("/debug/documents")
-    @ResponseBody
-    public String debugDocuments() {
-        return "Debug endpoint moved to AdminController";
-    }
 }

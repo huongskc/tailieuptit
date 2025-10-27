@@ -15,21 +15,18 @@ import java.util.Optional;
 public class UserController {
 
     @Autowired
-    private UserService userService; // THAY ĐỔI: Inject UserService
+    private UserService userService;
 
     // Lấy tất cả user
     @GetMapping
     public List<User> getAllUsers() {
-        // THAY ĐỔI: Gọi Service
         return userService.getAllUsers();
     }
 
-    // Lấy user theo id (Sửa lại: Nên dùng ID hoặc username thống nhất)
-    // Giả sử vẫn dùng username như file gốc
-    @GetMapping("/{username}")
-    public ResponseEntity<User> getUserById(@PathVariable String username) {
-        // THAY ĐỔI: Gọi Service
-        Optional<User> userOpt = userService.getUserByUsername(username);
+    // Lấy user theo id
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Integer id) {
+        Optional<User> userOpt = userService.getUserById(id);
 
         // Trả về 404 Not Found nếu không tìm thấy
         return userOpt.map(ResponseEntity::ok)
@@ -40,7 +37,6 @@ public class UserController {
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
         try {
-            // THAY ĐỔI: Gọi Service
             User newUser = userService.createUser(user);
             return new ResponseEntity<>(newUser, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -53,7 +49,6 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Integer id, @RequestBody User userDetails) {
         try {
-            // THAY ĐỔI: Gọi Service
             User updatedUser = userService.updateUser(id, userDetails);
             return ResponseEntity.ok(updatedUser);
         } catch (RuntimeException e) {
@@ -66,7 +61,6 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Integer id) {
         try {
-            // THAY ĐỔI: Gọi Service
             userService.deleteUser(id);
             return ResponseEntity.ok("Deleted user with id " + id);
         } catch (RuntimeException e) {

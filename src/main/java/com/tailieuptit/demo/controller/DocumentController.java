@@ -6,9 +6,6 @@ import com.tailieuptit.demo.entity.Comment;
 import com.tailieuptit.demo.entity.Document;
 import com.tailieuptit.demo.entity.User;
 import com.tailieuptit.demo.service.*;
-// THAY ĐỔI: Xóa bỏ inject Repository
-// import com.tailieuptit.demo.repository.CategoryRepository;
-// import com.tailieuptit.demo.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,7 +28,6 @@ public class DocumentController {
     @Autowired
     private UserService userService;
 
-    // THAY ĐỔI: Inject Service thay vì Repository
     @Autowired
     private CategoryService categoryService;
 
@@ -41,7 +37,6 @@ public class DocumentController {
     // Trang upload
     @GetMapping("/upload")
     public String uploadPage(Model model) {
-        // THAY ĐỔI: Gọi CategoryService
         List<Category> categories = categoryService.getAllCategories();
 
         model.addAttribute("categories", categories);
@@ -69,7 +64,6 @@ public class DocumentController {
             User currentUser = userService.getCurrentUser(session)
                     .orElseThrow(() -> new RuntimeException("User session expired"));
 
-            // Logic này đã nằm trong DocumentService là đúng
             Document savedDocument = documentService.createDocument(
                     document, file, categoryId, categoryName, newCategoryDescription, currentUser
             );
@@ -95,7 +89,6 @@ public class DocumentController {
             }
 
             Document doc = docOpt.get();
-            // THAY ĐỔI: Gọi CommentService
             List<Comment> comments = commentService.getCommentsByDocument(id);
 
             model.addAttribute("doc", doc);
@@ -114,7 +107,6 @@ public class DocumentController {
     @GetMapping("/{id}/download")
     public ResponseEntity<?> downloadDocument(@PathVariable Integer id) {
         try {
-            // Logic này đã nằm trong DocumentService là đúng
             return documentService.downloadDocument(id);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
@@ -139,7 +131,6 @@ public class DocumentController {
                 return "redirect:/document/" + id;
             }
 
-            // Logic này đã nằm trong DocumentService là đúng
             String documentTitle = documentService.deleteDocument(id);
             redirectAttributes.addFlashAttribute("message",
                     "Đã xóa tài liệu: " + documentTitle + " thành công!");
@@ -155,7 +146,6 @@ public class DocumentController {
     @GetMapping("/category/{id}")
     public String documentsByCategory(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
         try {
-            // THAY ĐỔI: Gọi CategoryService
             Optional<Category> categoryOpt = categoryService.getCategoryById(id);
             if (!categoryOpt.isPresent()) {
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy danh mục!");
@@ -164,7 +154,6 @@ public class DocumentController {
 
             Category category = categoryOpt.get();
             List<Document> documents = documentService.getDocumentsByCategory(id);
-            // THAY ĐỔI: Gọi CategoryService
             List<Category> categories = categoryService.getAllCategories();
 
             model.addAttribute("categories", categories);
@@ -182,7 +171,6 @@ public class DocumentController {
     // Trang tất cả tài liệu
     @GetMapping("/all")
     public String allDocuments(Model model) {
-        // THAY ĐỔI: Gọi CategoryService
         List<Category> categories = categoryService.getAllCategories();
         List<Document> documents = documentService.getAllDocuments();
 

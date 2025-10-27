@@ -1,4 +1,3 @@
-// src/main/java/com/tailieuptit/demo/service/UserService.java
 package com.tailieuptit.demo.service;
 
 import com.tailieuptit.demo.entity.User;
@@ -16,53 +15,23 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // ===== Logic xác thực & Session (Đã có) =====
+    // --- Authentication & Session ---
 
-    public Optional<User> getCurrentUser(HttpSession session) {
-        User currentUser = (User) session.getAttribute("currentUser");
-        if (currentUser != null) {
-            // Refresh user data from database
-            return userRepository.findById(currentUser.getUserId());
-        }
-        return Optional.empty();
-    }
-
-    public boolean isLoggedIn(HttpSession session) {
-        return session.getAttribute("currentUser") != null;
-    }
-
-    public boolean isAdmin(HttpSession session) {
-        User currentUser = (User) session.getAttribute("currentUser");
-        return currentUser != null && "admin".equals(currentUser.getUsername());
-    }
-
-    /**
-     * Xác thực người dùng.
-     * @return User nếu xác thực thành công, null nếu thất bại.
-     */
     public User authenticateUser(String username, String password) {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            // Trong thực tế, nên so sánh mật khẩu đã hash
-            if (password.equals(user.getPassword())) {
+            if (user.getPassword().equals(password)) {
                 return user;
             }
         }
         return null;
     }
 
-    /**
-     * Đăng ký người dùng mới.
-     * @return User đã được tạo.
-     * @throws RuntimeException nếu username hoặc email đã tồn tại.
-     */
-    public User registerUser(String username, String email, String password) {
-        // Check if username or email already exists
+    public void registerUser(String username, String email, String password) {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new RuntimeException("Tên đăng nhập đã tồn tại!");
         }
-
         if (userRepository.findByEmail(email).isPresent()) {
             throw new RuntimeException("Email đã được sử dụng!");
         }
@@ -70,60 +39,59 @@ public class UserService {
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setEmail(email);
-        newUser.setPassword(password); // In production, hash this password
+        newUser.setPassword(password);
 
-        return userRepository.save(newUser);
+        userRepository.save(newUser);
     }
 
-    // ===== Logic CRUD (Được chuyển từ Controller vào) =====
-
-    /**
-     * Lấy tất cả người dùng.
-     */
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public Optional<User> getCurrentUser(HttpSession session) {
+        User user = (User) session.getAttribute("currentUser");
+        if (user == null) {
+            return Optional.empty();
+        }
+        return userRepository.findById(user.getUserId());
     }
 
-    /**
-     * Lấy người dùng theo username.
-     */
+    public boolean isLoggedIn(HttpSession session) {
+        return session.getAttribute("isLoggedIn") != null && (Boolean) session.getAttribute("isLoggedIn");
+    }
+
+    public boolean isAdmin(HttpSession session) {
+        User currentUser = (User) session.getAttribute("currentUser");
+        return currentUser != null && "admin".equals(currentUser.getUsername());
+    }
+
+    // --- CRUD Operations (Used by API & Admin) ---
+
     public Optional<User> getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
-    /**
-     * Lấy người dùng theo ID.
-     */
     public Optional<User> getUserById(Integer id) {
         return userRepository.findById(id);
     }
 
-    /**
-     * Tạo mới hoặc cập nhật user (dùng cho API).
-     */
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
     public User createUser(User user) {
-        // Có thể thêm logic kiểm tra trùng lặp ở đây nếu cần
         return userRepository.save(user);
     }
 
-    /**
-     * Cập nhật thông tin user.
-     * @return User đã được cập nhật.
-     * @throws RuntimeException nếu không tìm thấy user.
-     */
     public User updateUser(Integer id, User userDetails) {
-        return userRepository.findById(id).map(user -> {
-            user.setUsername(userDetails.getUsername());
-            user.setEmail(userDetails.getEmail());
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id " + id));
+
+        user.setUsername(userDetails.getUsername());
+        user.setEmail(userDetails.getEmail());
+        if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
             user.setPassword(userDetails.getPassword());
-            return userRepository.save(user);
-        }).orElseThrow(() -> new RuntimeException("User not found with id " + id));
+        }
+
+        return userRepository.save(user);
     }
 
-    /**
-     * Xóa người dùng theo ID.
-     * @throws RuntimeException nếu không tìm thấy user để xóa.
-     */
     public void deleteUser(Integer id) {
         if (!userRepository.existsById(id)) {
             throw new RuntimeException("User not found with id " + id);

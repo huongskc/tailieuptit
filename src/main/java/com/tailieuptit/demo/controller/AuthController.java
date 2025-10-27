@@ -2,7 +2,7 @@
 package com.tailieuptit.demo.controller;
 
 import com.tailieuptit.demo.entity.User;
-import com.tailieuptit.demo.service.UserService; // THAY ĐỔI: Dùng UserService
+import com.tailieuptit.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,14 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
-// import java.util.Optional; // THAY ĐỔI: Không cần dùng Optional ở đây nữa
 
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
-    private UserService userService; // THAY ĐỔI: Inject UserService
+    private UserService userService;
 
     // Trang đăng nhập
     @GetMapping("/login")
@@ -33,7 +32,6 @@ public class AuthController {
                                HttpSession session,
                                RedirectAttributes redirectAttributes) {
         try {
-            // THAY ĐỔI: Gọi logic xác thực từ Service
             User user = userService.authenticateUser(username, password);
 
             if (user != null) {
@@ -95,8 +93,6 @@ public class AuthController {
                 return "redirect:/auth/register";
             }
 
-            // THAY ĐỔI: Gọi logic đăng ký từ Service
-            // Service sẽ tự xử lý kiểm tra trùng lặp và ném Exception nếu có lỗi
             userService.registerUser(username, email, password);
 
             redirectAttributes.addFlashAttribute("message",
