@@ -53,9 +53,9 @@ public class AuthController {
         }
     }
 
-    // Đăng xuất
     @GetMapping("/logout")
     public String logout(HttpSession session, RedirectAttributes redirectAttributes) {
+        // Clear session
         session.removeAttribute("currentUser");
         session.removeAttribute("isLoggedIn");
         session.invalidate();
