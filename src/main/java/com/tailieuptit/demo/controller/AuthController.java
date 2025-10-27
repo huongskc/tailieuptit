@@ -2,7 +2,7 @@
 package com.tailieuptit.demo.controller;
 
 import com.tailieuptit.demo.entity.User;
-import com.tailieuptit.demo.repository.UserRepository;
+import com.tailieuptit.demo.service.UserService; // THAY ĐỔI: Dùng UserService
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
-import java.util.Optional;
+// import java.util.Optional; // THAY ĐỔI: Không cần dùng Optional ở đây nữa
 
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService; // THAY ĐỔI: Inject UserService
 
     // Trang đăng nhập
     @GetMapping("/login")
@@ -33,25 +33,20 @@ public class AuthController {
                                HttpSession session,
                                RedirectAttributes redirectAttributes) {
         try {
-            Optional<User> userOpt = userRepository.findByUsername(username);
+            // THAY ĐỔI: Gọi logic xác thực từ Service
+            User user = userService.authenticateUser(username, password);
 
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
+            if (user != null) {
+                // Store user in session
+                session.setAttribute("currentUser", user);
+                session.setAttribute("isLoggedIn", true);
 
-                if (password.equals(user.getPassword())) {
-                    // Store user in session
-                    session.setAttribute("currentUser", user);
-                    session.setAttribute("isLoggedIn", true);
-
-                    redirectAttributes.addFlashAttribute("message",
-                            "Đăng nhập thành công! Chào mừng " + username);
-                    return "redirect:/";
-                } else {
-                    redirectAttributes.addFlashAttribute("error", "Mật khẩu không đúng!");
-                    return "redirect:/auth/login";
-                }
+                redirectAttributes.addFlashAttribute("message",
+                        "Đăng nhập thành công! Chào mừng " + username);
+                return "redirect:/";
             } else {
-                redirectAttributes.addFlashAttribute("error", "Tài khoản không tồn tại!");
+                // Service trả về null nghĩa là username hoặc password không đúng
+                redirectAttributes.addFlashAttribute("error", "Tài khoản hoặc mật khẩu không đúng!");
                 return "redirect:/auth/login";
             }
         } catch (Exception e) {
@@ -91,40 +86,26 @@ public class AuthController {
                 redirectAttributes.addFlashAttribute("error", "Tên đăng nhập phải có ít nhất 3 ký tự!");
                 return "redirect:/auth/register";
             }
-
             if (password.length() < 6) {
                 redirectAttributes.addFlashAttribute("error", "Mật khẩu phải có ít nhất 6 ký tự!");
                 return "redirect:/auth/register";
             }
-
             if (!password.equals(confirmPassword)) {
                 redirectAttributes.addFlashAttribute("error", "Mật khẩu xác nhận không khớp!");
                 return "redirect:/auth/register";
             }
 
-            // Check if username or email already exists
-            if (userRepository.findByUsername(username).isPresent()) {
-                redirectAttributes.addFlashAttribute("error", "Tên đăng nhập đã tồn tại!");
-                return "redirect:/auth/register";
-            }
-
-            if (userRepository.findByEmail(email).isPresent()) {
-                redirectAttributes.addFlashAttribute("error", "Email đã được sử dụng!");
-                return "redirect:/auth/register";
-            }
-
-            // Create new user
-            User newUser = new User();
-            newUser.setUsername(username);
-            newUser.setEmail(email);
-            newUser.setPassword(password);
-
-            userRepository.save(newUser);
+            // THAY ĐỔI: Gọi logic đăng ký từ Service
+            // Service sẽ tự xử lý kiểm tra trùng lặp và ném Exception nếu có lỗi
+            userService.registerUser(username, email, password);
 
             redirectAttributes.addFlashAttribute("message",
                     "Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.");
             return "redirect:/auth/login";
 
+        } catch (RuntimeException e) { // Bắt lỗi do Service ném ra (VD: Trùng user)
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/auth/register";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
             return "redirect:/auth/register";
