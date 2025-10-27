@@ -6,8 +6,9 @@ import com.tailieuptit.demo.entity.Document;
 import com.tailieuptit.demo.entity.User;
 import com.tailieuptit.demo.service.*;
 import com.tailieuptit.demo.service.DocumentService;
-import com.tailieuptit.demo.repository.UserRepository;
-import com.tailieuptit.demo.repository.DocumentRepository;
+// THAY ĐỔI: Xóa bỏ inject Repository
+// import com.tailieuptit.demo.repository.UserRepository;
+// import com.tailieuptit.demo.repository.DocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,11 +31,7 @@ public class AdminController {
     @Autowired
     private CategoryService categoryService;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private DocumentRepository documentRepository;
+    // THAY ĐỔI: Đã xóa bỏ UserRepository và DocumentRepository
 
     // Check admin access for all admin routes
     private boolean checkAdminAccess(HttpSession session, RedirectAttributes redirectAttributes) {
@@ -60,7 +57,8 @@ public class AdminController {
 
         List<Document> documents = documentService.getAllDocuments();
         List<Category> categories = categoryService.getAllCategories();
-        List<User> users = userRepository.findAll();
+        // THAY ĐỔI: Gọi sang UserService
+        List<User> users = userService.getAllUsers();
 
         model.addAttribute("totalDocuments", documents.size());
         model.addAttribute("totalCategories", categories.size());
@@ -79,7 +77,8 @@ public class AdminController {
         }
 
         try {
-            List<User> users = userRepository.findAll();
+            // THAY ĐỔI: Gọi sang UserService
+            List<User> users = userService.getAllUsers();
             StringBuilder result = new StringBuilder("Users in database:\n");
             for (User user : users) {
                 result.append("ID: ").append(user.getUserId())
@@ -103,7 +102,8 @@ public class AdminController {
         }
 
         try {
-            List<Document> documents = documentRepository.findAll();
+            // THAY ĐỔI: Gọi sang DocumentService
+            List<Document> documents = documentService.getAllDocuments();
             StringBuilder result = new StringBuilder("Documents in database:\n");
             for (Document doc : documents) {
                 result.append("ID: ").append(doc.getDocumentId())
