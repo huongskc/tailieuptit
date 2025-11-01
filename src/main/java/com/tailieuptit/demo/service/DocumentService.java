@@ -62,6 +62,53 @@ public class DocumentService {
         return documentRepository.findById(id);
     }
 
+    private Category resolveCategory(Integer categoryId, String categoryName, String description) {
+        if (categoryId != null && categoryId > 0) {
+            return categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+        } else if (categoryName != null && !categoryName.trim().isEmpty()) {
+            Optional<Category> existing = categoryRepository.findByName(categoryName.trim());
+            if (existing.isPresent()) {
+                return existing.get();
+            } else {
+                Category newCategory = new Category();
+                newCategory.setName(categoryName.trim());
+                newCategory.setDescription(description != null ? description.trim() : "");
+                return categoryRepository.save(newCategory);
+            }
+        } else {
+            throw new RuntimeException("Vui lòng chọn hoặc tạo danh mục!");
+        }
+    }
+
+    private String saveFile(MultipartFile file) throws IOException {
+        Path uploadPath = Paths.get(UPLOAD_DIR);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        String filename = System.currentTimeMillis() + "_" + originalFilename;
+        Path filePath = uploadPath.resolve(filename);
+        Files.copy(file.getInputStream(), filePath);
+
+        return filename;
+    }
+
+    private void deletePhysicalFile(String filePath) {
+        try {
+            if (filePath != null && filePath.startsWith("/uploads/")) {
+                String actualFilePath = filePath.substring("/uploads/".length());
+                Path file = Paths.get(UPLOAD_DIR).resolve(actualFilePath);
+                if (Files.exists(file)) {
+                    Files.delete(file);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Could not delete physical file: " + e.getMessage());
+        }
+    }
+
     public Document createDocument(Document document, MultipartFile file,
                                    Integer categoryId, String categoryName,
                                    String newCategoryDescription, User user) throws IOException {
@@ -159,53 +206,6 @@ public class DocumentService {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error downloading file: " + e.getMessage());
-        }
-    }
-
-    private Category resolveCategory(Integer categoryId, String categoryName, String description) {
-        if (categoryId != null && categoryId > 0) {
-            return categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-        } else if (categoryName != null && !categoryName.trim().isEmpty()) {
-            Optional<Category> existing = categoryRepository.findByName(categoryName.trim());
-            if (existing.isPresent()) {
-                return existing.get();
-            } else {
-                Category newCategory = new Category();
-                newCategory.setName(categoryName.trim());
-                newCategory.setDescription(description != null ? description.trim() : "");
-                return categoryRepository.save(newCategory);
-            }
-        } else {
-            throw new RuntimeException("Vui lòng chọn hoặc tạo danh mục!");
-        }
-    }
-
-    private String saveFile(MultipartFile file) throws IOException {
-        Path uploadPath = Paths.get(UPLOAD_DIR);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-
-        String originalFilename = file.getOriginalFilename();
-        String filename = System.currentTimeMillis() + "_" + originalFilename;
-        Path filePath = uploadPath.resolve(filename);
-        Files.copy(file.getInputStream(), filePath);
-
-        return filename;
-    }
-
-    private void deletePhysicalFile(String filePath) {
-        try {
-            if (filePath != null && filePath.startsWith("/uploads/")) {
-                String actualFilePath = filePath.substring("/uploads/".length());
-                Path file = Paths.get(UPLOAD_DIR).resolve(actualFilePath);
-                if (Files.exists(file)) {
-                    Files.delete(file);
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Could not delete physical file: " + e.getMessage());
         }
     }
 }
