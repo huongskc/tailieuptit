@@ -24,11 +24,7 @@ public class CategoryService {
         if (query == null || query.trim().isEmpty()) {
             return getAllCategories();
         }
-
-        List<Category> categories = categoryRepository.findAll();
-        return categories.stream()
-                .filter(cat -> cat.getName().toLowerCase().contains(query.toLowerCase()))
-                .collect(Collectors.toList());
+        return categoryRepository.findByNameContainingIgnoreCase(query.trim());
     }
 
     public Category createCategory(String name, String description) {
@@ -37,7 +33,7 @@ public class CategoryService {
         }
 
         // Check if category already exists
-        Optional<Category> existing = categoryRepository.findByName(name.trim());
+        Optional<Category> existing = categoryRepository.findByNameIgnoreCase(name.trim());
         if (existing.isPresent()) {
             return existing.get();
         }
@@ -51,10 +47,6 @@ public class CategoryService {
 
     public Optional<Category> getCategoryById(Integer id) {
         return categoryRepository.findById(id);
-    }
-
-    public Optional<Category> getCategoryByName(String name) {
-        return categoryRepository.findByName(name);
     }
 
     public void deleteCategory(Integer id) {
